@@ -39,31 +39,8 @@ app.post('/user/signup', async (req, res) => {
   }
 });
 
-app.post('/user/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
 
-    db.get(
-      'SELECT * FROM users WHERE username = ? AND password = ?',
-      [username, password],
-      (err, row) => {
-        if (err) {
-          console.error(err);
-          res.status(500).json({ message: 'Server error' });
-        } else if (!row) {
-          res.status(401).json({ message: 'Invalid username or password' });
-        } else {
-          res.status(200).json({ message: 'Login successful', user: row });
-        }
-      }
-    );
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-app.delete('/user/profile', async (req, res) => {
+app.delete('/user/delete', async (req, res) => {
   try {
     const { id } = req.body;
     
