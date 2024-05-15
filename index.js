@@ -112,10 +112,10 @@ app.post('/channel/create', async (req, res) => {
 
 app.post('/channel/:channelId/message/create', async (req, res) => {
   try {
-    const { message, userId } = req.body; // Assuming you'll send the message content and user ID in the request body
+    const { message, userId } = req.body;
     const channelId = req.params.channelId;
 
-    // Insert message into the database
+    
     db.run(
       'INSERT INTO messages (message, user_id) VALUES (?, ?)',
       [message, userId],
@@ -126,7 +126,7 @@ app.post('/channel/:channelId/message/create', async (req, res) => {
         } else {
           const messageId = this.lastID;
 
-          // Insert message-channel association into the database
+        
           db.run(
             'INSERT INTO messagesChannels (message_id, channel_id) VALUES (?, ?)',
             [messageId, channelId],
