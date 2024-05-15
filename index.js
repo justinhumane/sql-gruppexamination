@@ -65,11 +65,11 @@ app.post('/user/login', async (req, res) => {
 
 app.delete('/user/profile', async (req, res) => {
   try {
-    const { Id } = req.body;
+    const { id } = req.body;
     
     db.run(
       'DELETE FROM users WHERE id = ?',
-      [Id],
+      [id],
       function (err) {
         if (err) {
           console.error(err);
@@ -101,6 +101,45 @@ app.post('/channel/create', async (req, res) => {
         } else {
           console.log(`Channel ${name} created with ID: ${this.lastID}`);
           res.status(201).json({ message: 'Channel created successfully' });
+        }
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/channel/:channelId/message/create', async (req, res) => {
+  try {
+    const { message, userId } = req.body; // Assuming you'll send the message content and user ID in the request body
+    const channelId = req.params.channelId;
+
+    // Insert message into the database
+    db.run(
+      'INSERT INTO messages (message, user_id) VALUES (?, ?)',
+      [message, userId],
+      function (err) {
+        if (err) {
+          console.error(err);
+          res.status(500).json({ message: 'Failed to create message' });
+        } else {
+          const messageId = this.lastID;
+
+          // Insert message-channel association into the database
+          db.run(
+            'INSERT INTO messagesChannels (message_id, channel_id) VALUES (?, ?)',
+            [messageId, channelId],
+            function (err) {
+              if (err) {
+                console.error(err);
+                res.status(500).json({ message: 'Failed to associate message with channel' });
+              } else {
+                console.log(`Message ${messageId} created in channel ${channelId}`);
+                res.status(201).json({ message: 'Message created successfully' });
+              }
+            }
+          );
         }
       }
     );
