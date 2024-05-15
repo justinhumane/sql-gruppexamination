@@ -18,8 +18,12 @@ const initDatabase = () => {
   const messagesChannelsTable =
     "CREATE TABLE IF NOT EXISTS messagesChannels(message_id INTEGER, channel_id INTEGER, FOREIGN KEY (message_id) REFERENCES messages(id), FOREIGN KEY (channel_id) REFERENCES channels(id))";
 
+  const usersChannelsTable =
+    "CREATE TABLE IF NOT EXISTS usersChannels(user_id INTEGER, channel_id INTEGER, FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (channel_id) REFERENCES channels(id))";
+
   db.serialize(() => {
     db.run(usersTable)
+      .run(usersChannelsTable)
       .run(channelsTable)
       .run(messagesTable)
       .run(messagesChannelsTable, (error) => {
