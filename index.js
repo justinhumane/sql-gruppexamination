@@ -62,3 +62,50 @@ app.post('/user/login', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.delete('/user/profile', async (req, res) => {
+  try {
+    const { Id } = req.body;
+    
+    db.run(
+      'DELETE FROM users WHERE id = ?',
+      [Id],
+      function (err) {
+        if (err) {
+          console.error(err);
+          res.status(500).json({ message: 'Failed to delete user profile' });
+        } else if (this.changes === 0) {
+          res.status(404).json({ message: 'User not found' });
+        } else {
+          res.status(200).json({ message: 'User profile deleted successfully' });
+        }
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/channel/create', async (req, res) => {
+  try {
+    const { name, ownerId } = req.body;
+
+    db.run(
+      'INSERT INTO channels (name, owner_id) VALUES (?, ?)',
+      [name, ownerId],
+      function (err) {
+        if (err) {
+          console.error(err);
+          res.status(500).json({ message: 'Failed to create channel' });
+        } else {
+          console.log(`Channel ${name} created with ID: ${this.lastID}`);
+          res.status(201).json({ message: 'Channel created successfully' });
+        }
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
