@@ -11,14 +11,18 @@ router
       const channelId = req.params.channelId;
       const { userId } = req.body;
 
-      db.run("INSERT INTO usersChannels (user_id, channel_id) VALUES (?, ?)", [userId, channelId], function (err) {
-        if (err) {
-          console.error(err);
-          res.status(500).json({ message: "Failed" });
-        } else {
-          res.status(201).json({ message: "success" });
+      db.run(
+        "INSERT INTO usersChannels (user_id, channel_id) VALUES (?, ?)",
+        [userId, channelId],
+        function (err) {
+          if (err) {
+            console.error(err);
+            res.status(500).json({ message: "Failed" });
+          } else {
+            res.status(201).json({ message: "success" });
+          }
         }
-      });
+      );
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server error" });
@@ -51,15 +55,48 @@ router
     try {
       const { name, ownerId } = req.body;
 
-      db.run("INSERT INTO channels (name, owner_id) VALUES (?, ?)", [name, ownerId], function (err) {
-        if (err) {
-          console.error(err);
-          res.status(500).json({ message: "Failed to create channel" });
-        } else {
-          console.log(`Channel ${name} created with ID: ${this.lastID}`);
-          res.status(201).json({ message: "Channel created successfully" });
+      db.run(
+        "INSERT INTO channels (name, owner_id) VALUES (?, ?)",
+        [name, ownerId],
+        function (err) {
+          if (err) {
+            console.error(err);
+            res.status(500).json({ message: "Failed to create channel" });
+          } else {
+            console.log(`Channel ${name} created with ID: ${this.lastID}`);
+            res.status(201).json({ message: "Channel created successfully" });
+          }
         }
-      });
+      );
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    }
+  })
+  .get("/:channelId/messages/sorted", async (req, res) => {
+    console.log("Sorting route called");
+
+    const channelId = req.params.channelId;
+    console.log("Channel ID:", channelId);
+
+    const sortOrder = req.query.sortOrder === "desc" ? "DESC" : "ASC";
+    console.log("Sort Order:", sortOrder);
+    try {
+      db.all(
+        `SELECT messages.* FROM messages 
+         JOIN messagesChannels ON messages.id = messagesChannels.message_id 
+         WHERE messagesChannels.channel_id = ? 
+         ORDER BY messages.created_at ${sortOrder}`,
+        [channelId],
+        (err, rows) => {
+          if (err) {
+            console.error(err);
+            res.status(500).json({ message: "Failed to retrieve messages" });
+          } else {
+            res.status(200).json(rows);
+          }
+        }
+      );
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server error" });
